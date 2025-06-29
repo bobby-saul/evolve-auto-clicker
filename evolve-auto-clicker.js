@@ -1,15 +1,19 @@
 console.log('Adding Evolve Auto Clicker');
 // Initial variables
-window.evolveAutoClicker = {};
-evolveAutoClicker.TIME = 25;
-evolveAutoClicker.MAX_CLICKS = 1000;
-evolveAutoClicker.CLICK_FOOD = true;
-evolveAutoClicker.CLICK_LUMBER = true;
-evolveAutoClicker.CLICK_STONE = true;
-evolveAutoClicker.CLICK_CHRYSOTILE = true;
-evolveAutoClicker.LAST_RUN_TIME = Date.now();
-// Interval
-evolveAutoClicker.interval = setInterval(() => {
+const LOCAL_STORAGE_NAME = 'evolve-auto-clicker';
+window.evolveAutoClicker = window.localStorage.getItem(LOCAL_STORAGE_NAME)
+  ? JSON.parse(window.localStorage.getItem('evolve-auto-clicker'))
+  : {
+      TIME: 25,
+      MAX_CLICKS: 1000,
+      CLICK_FOOD: true,
+      CLICK_LUMBER: true,
+      CLICK_STONE: true,
+      CLICK_CHRYSOTILE: true,
+      LAST_RUN_TIME: Date.now(),
+    };
+// Auto Click Function
+const autoClickFunction = () => {
   const currentTimestamp = Date.now();
   const numberOfRuns = Math.min(
     Math.round(
@@ -37,7 +41,16 @@ evolveAutoClicker.interval = setInterval(() => {
       chrysotileButton.click();
     }
   }
-}, evolveAutoClicker.TIME);
+  window.localStorage.setItem(
+    LOCAL_STORAGE_NAME,
+    JSON.stringify(evolveAutoClicker)
+  );
+};
+// Interval
+evolveAutoClicker.interval = setInterval(
+  autoClickFunction,
+  evolveAutoClicker.TIME
+);
 // Set up UI
 evolveAutoClicker.setupUI = () => {
   const wrapper = document.createElement('div');
@@ -48,7 +61,7 @@ evolveAutoClicker.setupUI = () => {
   const clicksPerSecondSpan = document.createElement('span');
   clicksPerSecondSpan.style.display = 'block';
   clicksPerSecondSpan.style.textAlign = 'center';
-  clicksPerSecondSpan.textContent = 'Clicks/Second';
+  clicksPerSecondSpan.textContent = 'Clicks/Sec';
   const clicksPerSecondInput = document.createElement('input');
   clicksPerSecondInput.style.display = 'block';
   clicksPerSecondInput.style.margin = 'auto';
@@ -60,13 +73,20 @@ evolveAutoClicker.setupUI = () => {
   clicksPerSecondInput.value = Math.round(1000 / evolveAutoClicker.TIME);
   clicksPerSecondInput.onchange = (e) => {
     evolveAutoClicker.TIME = 1000 / e.target.value;
+    clearInterval(evolveAutoClicker.interval);
+    evolveAutoClicker.interval = setInterval(
+      autoClickFunction,
+      evolveAutoClicker.TIME
+    );
   };
   wrapper.appendChild(clicksPerSecondLabel);
   clicksPerSecondLabel.appendChild(clicksPerSecondSpan);
   clicksPerSecondLabel.appendChild(clicksPerSecondInput);
   // Food button
   const toggleFoodButton = document.createElement('button');
-  toggleFoodButton.textContent = 'Stop Food';
+  toggleFoodButton.textContent = evolveAutoClicker.CLICK_FOOD
+    ? 'Stop Food'
+    : 'Start Food';
   toggleFoodButton.classList.add('button');
   toggleFoodButton.onclick = (e) => {
     e.preventDefault();
@@ -78,7 +98,9 @@ evolveAutoClicker.setupUI = () => {
   wrapper.appendChild(toggleFoodButton);
   // Lumber button
   const toggleLumberButton = document.createElement('button');
-  toggleLumberButton.textContent = 'Stop Lumber';
+  toggleLumberButton.textContent = evolveAutoClicker.CLICK_LUMBER
+    ? 'Stop Lumber'
+    : 'Start Lumber';
   toggleLumberButton.classList.add('button');
   toggleLumberButton.onclick = (e) => {
     e.preventDefault();
@@ -90,7 +112,9 @@ evolveAutoClicker.setupUI = () => {
   wrapper.appendChild(toggleLumberButton);
   // Stone button
   const toggleStoneButton = document.createElement('button');
-  toggleStoneButton.textContent = 'Stop Stone';
+  toggleStoneButton.textContent = evolveAutoClicker.CLICK_STONE
+    ? 'Stop Stone'
+    : 'Start Stone';
   toggleStoneButton.classList.add('button');
   toggleStoneButton.onclick = (e) => {
     e.preventDefault();
@@ -99,9 +123,12 @@ evolveAutoClicker.setupUI = () => {
       ? 'Stop Stone'
       : 'Start Stone';
   };
+  wrapper.appendChild(toggleStoneButton);
   // Chrysotile button
   const toggleChrysotileButton = document.createElement('button');
-  toggleChrysotileButton.textContent = 'Stop Chrysotile';
+  toggleChrysotileButton.textContent = evolveAutoClicker.CLICK_CHRYSOTILE
+    ? 'Stop Chrysotile'
+    : 'Start Chrysotile';
   toggleChrysotileButton.classList.add('button');
   toggleChrysotileButton.onclick = (e) => {
     e.preventDefault();
