@@ -43,6 +43,27 @@ evolveAutoClicker.setupUI = () => {
   const wrapper = document.createElement('div');
   wrapper.classList.add('evolve-auto-clicker');
   document.body.appendChild(wrapper);
+  // Clicks Per Second input
+  const clicksPerSecondLabel = document.createElement('label');
+  const clicksPerSecondSpan = document.createElement('span');
+  clicksPerSecondSpan.style.display = 'block';
+  clicksPerSecondSpan.style.textAlign = 'center';
+  clicksPerSecondSpan.textContent = 'Clicks/Second';
+  const clicksPerSecondInput = document.createElement('input');
+  clicksPerSecondInput.style.display = 'block';
+  clicksPerSecondInput.style.margin = 'auto';
+  clicksPerSecondInput.style.width = '8ch';
+  clicksPerSecondInput.type = 'number';
+  clicksPerSecondInput.step = '1';
+  clicksPerSecondInput.min = '1';
+  clicksPerSecondInput.max = '1000';
+  clicksPerSecondInput.value = Math.round(1000 / evolveAutoClicker.TIME);
+  clicksPerSecondInput.onchange = (e) => {
+    evolveAutoClicker.TIME = 1000 / e.target.value;
+  };
+  wrapper.appendChild(clicksPerSecondLabel);
+  clicksPerSecondLabel.appendChild(clicksPerSecondSpan);
+  clicksPerSecondLabel.appendChild(clicksPerSecondInput);
   // Food button
   const toggleFoodButton = document.createElement('button');
   toggleFoodButton.textContent = 'Stop Food';
@@ -104,7 +125,7 @@ evolveAutoClicker.setupUI = () => {
   maxClickInput.step = '1';
   maxClickInput.min = '1';
   maxClickInput.value = evolveAutoClicker.MAX_CLICKS;
-  toggleChrysotileButton.onchange = (e) => {
+  maxClickInput.onchange = (e) => {
     evolveAutoClicker.MAX_CLICKS = e.target.value;
   };
   wrapper.appendChild(maxClickLabel);
