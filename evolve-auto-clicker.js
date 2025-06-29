@@ -2,21 +2,27 @@ console.log('Adding Evolve Auto Clicker');
 // Initial variables
 window.evolveAutoClicker = {};
 evolveAutoClicker.TIME = 25;
+evolveAutoClicker.MAX_CLICKS = 1000;
 evolveAutoClicker.CLICK_FOOD = true;
 evolveAutoClicker.CLICK_LUMBER = true;
 evolveAutoClicker.CLICK_STONE = true;
+evolveAutoClicker.CLICK_CHRYSOTILE = true;
 evolveAutoClicker.LAST_RUN_TIME = Date.now();
 // Interval
 evolveAutoClicker.interval = setInterval(() => {
   const currentTimestamp = Date.now();
-  const numberOfRuns = Math.round(
-    (currentTimestamp - evolveAutoClicker.LAST_RUN_TIME) /
-      evolveAutoClicker.TIME
+  const numberOfRuns = Math.min(
+    Math.round(
+      (currentTimestamp - evolveAutoClicker.LAST_RUN_TIME) /
+        evolveAutoClicker.TIME
+    ),
+    evolveAutoClicker.MAX_CLICKS
   );
   evolveAutoClicker.LAST_RUN_TIME = currentTimestamp;
   const lumberButton = document.querySelector('#city-lumber .button');
   const stoneButton = document.querySelector('#city-stone .button');
   const foodButton = document.querySelector('#city-food .button');
+  const chrysotileButton = document.querySelector('#city-chrysotile .button');
   for (let index = 0; index < numberOfRuns; index++) {
     if (foodButton && evolveAutoClicker.CLICK_FOOD) {
       foodButton.click();
@@ -26,6 +32,9 @@ evolveAutoClicker.interval = setInterval(() => {
     }
     if (stoneButton && evolveAutoClicker.CLICK_STONE) {
       stoneButton.click();
+    }
+    if (chrysotileButton && evolveAutoClicker.CLICK_CHRYSOTILE) {
+      chrysotileButton.click();
     }
   }
 }, evolveAutoClicker.TIME);
@@ -69,7 +78,38 @@ evolveAutoClicker.setupUI = () => {
       ? 'Stop Stone'
       : 'Start Stone';
   };
-  wrapper.appendChild(toggleStoneButton);
+  // Chrysotile button
+  const toggleChrysotileButton = document.createElement('button');
+  toggleChrysotileButton.textContent = 'Stop Chrysotile';
+  toggleChrysotileButton.classList.add('button');
+  toggleChrysotileButton.onclick = (e) => {
+    e.preventDefault();
+    evolveAutoClicker.CLICK_CHRYSOTILE = !evolveAutoClicker.CLICK_CHRYSOTILE;
+    toggleChrysotileButton.textContent = evolveAutoClicker.CLICK_CHRYSOTILE
+      ? 'Stop Chrysotile'
+      : 'Start Chrysotile';
+  };
+  wrapper.appendChild(toggleChrysotileButton);
+  // Max click input
+  const maxClickLabel = document.createElement('label');
+  const maxClickSpan = document.createElement('span');
+  maxClickSpan.style.display = 'block';
+  maxClickSpan.style.textAlign = 'center';
+  maxClickSpan.textContent = 'Max Click';
+  const maxClickInput = document.createElement('input');
+  maxClickInput.style.display = 'block';
+  maxClickInput.style.margin = 'auto';
+  maxClickInput.style.width = '8ch';
+  maxClickInput.type = 'number';
+  maxClickInput.step = '1';
+  maxClickInput.min = '1';
+  maxClickInput.value = evolveAutoClicker.MAX_CLICKS;
+  toggleChrysotileButton.onchange = (e) => {
+    evolveAutoClicker.MAX_CLICKS = e.target.value;
+  };
+  wrapper.appendChild(maxClickLabel);
+  maxClickLabel.appendChild(maxClickSpan);
+  maxClickLabel.appendChild(maxClickInput);
   // Label
   const label = document.createElement('div');
   label.textContent = 'Auto';
