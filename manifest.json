@@ -1,11 +1,18 @@
 {
   "name": "Evolve Auto Clicker",
-  "description": "Automatically clicks the food, lumber, and stone gather buttons in the Evolve Idle game.",
-  "version": "1.0.0",
+  "description": "Automatically clicks the food, lumber, stone, and chrysotile gather buttons in the Evolve Idle game.",
+  "version": "2.0.0",
   "manifest_version": 3,
   "background": {
     "service_worker": "background.js"
   },
+  "content_scripts" : [
+    {
+      "matches": ["https://pmotschmann.github.io/Evolve/"],
+      "js": ["evolve-auto-clicker.js"],
+      "run_at": "document_idle"
+    }
+  ],
   "permissions": ["activeTab", "scripting"],
   "action": {
     "default_icon": {

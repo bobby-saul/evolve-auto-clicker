@@ -1,9 +1,11 @@
-console.log('Adding Evolve Auto Clicker');
+const CHANGE_STATUS_MESSAGE = 'CHANGE_STATUS';
+
 // Initial variables
-const LOCAL_STORAGE_NAME = 'evolve-auto-clicker';
-window.evolveAutoClicker = window.localStorage.getItem(LOCAL_STORAGE_NAME)
+const EVOLVE_LOCAL_STORAGE_NAME = 'evolve-auto-clicker';
+const evolveAutoClicker = window.localStorage.getItem(EVOLVE_LOCAL_STORAGE_NAME)
   ? JSON.parse(window.localStorage.getItem('evolve-auto-clicker'))
   : {
+      ACTIVE: true,
       TIME: 25,
       MAX_CLICKS: 1000,
       CLICK_FOOD: true,
@@ -12,6 +14,7 @@ window.evolveAutoClicker = window.localStorage.getItem(LOCAL_STORAGE_NAME)
       CLICK_CHRYSOTILE: true,
       LAST_RUN_TIME: Date.now(),
     };
+
 // Auto Click Function
 const autoClickFunction = () => {
   const currentTimestamp = Date.now();
@@ -41,18 +44,11 @@ const autoClickFunction = () => {
       chrysotileButton.click();
     }
   }
-  window.localStorage.setItem(
-    LOCAL_STORAGE_NAME,
-    JSON.stringify(evolveAutoClicker)
-  );
+  saveState();
 };
-// Interval
-evolveAutoClicker.interval = setInterval(
-  autoClickFunction,
-  evolveAutoClicker.TIME
-);
+
 // Set up UI
-evolveAutoClicker.setupUI = () => {
+const setupUI = () => {
   const wrapper = document.createElement('div');
   wrapper.classList.add('evolve-auto-clicker');
   document.body.appendChild(wrapper);
@@ -189,11 +185,54 @@ evolveAutoClicker.setupUI = () => {
 `;
   document.body.appendChild(stylesTag);
 };
-evolveAutoClicker.setupUI();
+
+// Save active state function.
+const saveState = () => {
+  window.localStorage.setItem(
+    EVOLVE_LOCAL_STORAGE_NAME,
+    JSON.stringify(evolveAutoClicker)
+  );
+};
+
+// Start script
+const startUp = () => {
+  evolveAutoClicker.ACTIVE = true;
+  evolveAutoClicker.LAST_RUN_TIME = Date.now();
+  setupUI();
+  // Interval
+  evolveAutoClicker.interval = setInterval(
+    autoClickFunction,
+    evolveAutoClicker.TIME
+  );
+};
+
 // Clean up script
-evolveAutoClicker.cleanUp = () => {
+const cleanUp = () => {
   clearInterval(evolveAutoClicker.interval);
+  evolveAutoClicker.ACTIVE = false;
   document.querySelector('.evolve-auto-clicker').remove();
   document.querySelector('.evolve-auto-clicker-styles').remove();
-  delete window.evolveAutoClicker;
+  saveState();
 };
+
+// Check if is initially enabled.
+if (evolveAutoClicker.ACTIVE) {
+  startUp();
+}
+
+// Send extension initial status.
+chrome.runtime.sendMessage({
+  type: CHANGE_STATUS_MESSAGE,
+  status: evolveAutoClicker.ACTIVE,
+});
+
+// Listen for extension status updates
+chrome.runtime.onMessage.addListener((message) => {
+  if (message.type === CHANGE_STATUS_MESSAGE) {
+    if (message.status) {
+      startUp();
+    } else {
+      cleanUp();
+    }
+  }
+});

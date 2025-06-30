@@ -1,32 +1,55 @@
-chrome.runtime.onInstalled.addListener(() => {
+const CHANGE_STATUS_MESSAGE = 'CHANGE_STATUS';
+const ON_TEXT = 'On';
+const OFF_TEXT = 'Off';
+
+const turnOn = async () => {
+  chrome.action.setBadgeBackgroundColor({ color: '#90EE90' });
   chrome.action.setBadgeText({
-    text: 'OFF',
+    text: ON_TEXT,
   });
+};
+
+const turnOff = async () => {
+  chrome.action.setBadgeBackgroundColor({ color: '#FF7F7F' });
+  chrome.action.setBadgeText({
+    text: OFF_TEXT,
+  });
+};
+
+chrome.runtime.onMessage.addListener(async (message) => {
+  if (message.type === CHANGE_STATUS_MESSAGE) {
+    if (message.status) {
+      await turnOn();
+    } else {
+      await turnOff();
+    }
+  }
 });
 
-chrome.action.onClicked.addListener(async (tab) => {
+chrome.action.onClicked.addListener(async () => {
   // Retrieve the action badge to check if the extension is 'ON' or 'OFF'
-  const prevState = await chrome.action.getBadgeText({ tabId: tab.id });
-  // Next state will always be the opposite
-  const nextState = prevState === 'ON' ? 'OFF' : 'ON';
+  const badgeText = await chrome.action.getBadgeText({});
+  if (badgeText === ON_TEXT) {
+    await turnOff();
+  } else {
+    await turnOn();
+  }
 
-  // Set the action badge to the next state
-  await chrome.action.setBadgeText({
-    tabId: tab.id,
-    text: nextState,
-  });
-
-  if (nextState === 'ON') {
-    // Insert the CSS file when the user turns the extension on
-    await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      files: ['evolve-auto-clicker.js'],
-    });
-  } else if (nextState === 'OFF') {
-    // Remove the CSS file when the user turns the extension off
-    await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      files: ['clean-up.js'],
-    });
+  const tabs = await chrome.tabs.query({});
+  for (const tab of tabs) {
+    if (
+      tab.url &&
+      !tab.url.startsWith('chrome://') &&
+      !tab.url.startsWith('chrome-extension://')
+    ) {
+      try {
+        await chrome.tabs.sendMessage(tab.id, {
+          type: 'CHANGE_STATUS',
+          status: badgeText !== ON_TEXT,
+        });
+      } catch (error) {
+        console.error('Error sending message to content script:', error);
+      }
+    }
   }
 });
