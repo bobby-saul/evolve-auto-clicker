@@ -12,6 +12,7 @@ const evolveAutoClicker = window.localStorage.getItem(EVOLVE_LOCAL_STORAGE_NAME)
       CLICK_LUMBER: true,
       CLICK_STONE: true,
       CLICK_CHRYSOTILE: true,
+      CLICK_SLAUGHTER: true,
       LAST_RUN_TIME: Date.now(),
     };
 
@@ -30,6 +31,7 @@ const autoClickFunction = () => {
   const stoneButton = document.querySelector('#city-stone .button');
   const foodButton = document.querySelector('#city-food .button');
   const chrysotileButton = document.querySelector('#city-chrysotile .button');
+  const slaughterButton = document.querySelector('#city-slaughter .button');
   for (let index = 0; index < numberOfRuns; index++) {
     if (foodButton && evolveAutoClicker.CLICK_FOOD) {
       foodButton.click();
@@ -41,6 +43,9 @@ const autoClickFunction = () => {
       stoneButton.click();
     }
     if (chrysotileButton && evolveAutoClicker.CLICK_CHRYSOTILE) {
+      chrysotileButton.click();
+    }
+    if (slaughterButton && evolveAutoClicker.CLICK_SLAUGHTER) {
       chrysotileButton.click();
     }
   }
@@ -134,6 +139,20 @@ const setupUI = () => {
       : 'Start Chrysotile';
   };
   wrapper.appendChild(toggleChrysotileButton);
+  // Slaughter button
+  const toggleSlaughterButton = document.createElement('button');
+  toggleSlaughterButton.textContent = evolveAutoClicker.CLICK_SLAUGHTER
+    ? 'Stop Slaughter'
+    : 'Start Slaughter';
+  toggleSlaughterButton.classList.add('button');
+  toggleSlaughterButton.onclick = (e) => {
+    e.preventDefault();
+    evolveAutoClicker.CLICK_SLAUGHTER = !evolveAutoClicker.CLICK_SLAUGHTER;
+    toggleSlaughterButton.textContent = evolveAutoClicker.CLICK_SLAUGHTER
+      ? 'Stop Slaughter'
+      : 'Start Slaughter';
+  };
+  wrapper.appendChild(toggleSlaughterButton);
   // Max click input
   const maxClickLabel = document.createElement('label');
   const maxClickSpan = document.createElement('span');
