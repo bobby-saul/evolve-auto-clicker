@@ -46,7 +46,7 @@ const autoClickFunction = () => {
       chrysotileButton.click();
     }
     if (slaughterButton && evolveAutoClicker.CLICK_SLAUGHTER) {
-      chrysotileButton.click();
+      slaughterButton.click();
     }
   }
   saveState();
